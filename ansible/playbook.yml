@@ -1,0 +1,32 @@
+- name: Configurar servidor web automáticamente
+  hosts: webservers
+  become: yes
+
+  tasks:
+    - name: Actualizar el sistema
+      apt:
+        update_cache: yes
+        upgrade: dist
+      when: ansible_os_family == "Debian"
+
+    - name: Actualizar el sistema (RedHat/Amazon Linux)
+      yum:
+        name: '*'
+        state: latest
+      when: ansible_os_family == "RedHat"
+
+    - name: Instalar Nginx
+      package:
+        name: nginx
+        state: present
+
+    - name: Iniciar y habilitar Nginx
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: Crear archivo HTML de prueba
+      copy:
+        dest: /var/www/html/index.html
+        content: "Servidor desplegado automáticamente con Ansible + Terraform"
